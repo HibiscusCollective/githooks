@@ -23,16 +23,5 @@
 !LICENSE
 !README.md
 
-## Allow tests
-!spec/
-!spec/**/
-!spec/**/*.bats
-
-!vendor/
-!vendor/bats
-!vendor/bats/assert
-!vendor/bats/support
-!vendor/bats/file
-
 ## Allow lefthook configuration
 !.lefthook.yml
