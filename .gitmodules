@@ -1,7 +1,7 @@
 [submodule "vendor/bats/support"]
 	path = vendor/bats/support
 	url = https://github.com/bats-core/bats-support
-	branch = 0.3.0
+	branch = v0.3.0
 
 [submodule "vendor/bats/assert"]
 	path = vendor/bats/assert

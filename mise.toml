@@ -3,15 +3,24 @@ bats = "1.11.1"
 lefthook = "1.10.10"
 
 [env]
-BATS_ASSERT_PATH = "./vendor/bats/assert"
+BATS_ASSERT_PATH = "vendor/bats/assert"
 BATS_ASSERT_VERSION = "v2.1.0"
 
-BATS_SUPPORT_PATH = "./vendor/bats/support"
+BATS_SUPPORT_PATH = "vendor/bats/support"
 BATS_SUPPORT_VERSION = "v0.3.0"
 
-BATS_FILE_PATH = "./vendor/bats/file"
+BATS_FILE_PATH = "vendor/bats/file"
 BATS_FILE_VERSION = "v0.4.0"
 
 [tasks."bats:sync"]
+description = "Ensure bats submodules are up to date and synced with their upstream versions"
+depends = ["bats:update"]
+run = "git submodule update --init --recursive --depth=1 --force"
+
+[tasks."bats:update"]
 hide = true
-run = "git submodule update --init --recursive --depth=1"
+run = """
+git submodule set-branch --branch $BATS_ASSERT_VERSION $BATS_ASSERT_PATH
+git submodule set-branch --branch $BATS_SUPPORT_VERSION $BATS_SUPPORT_PATH
+git submodule set-branch --branch $BATS_FILE_VERSION $BATS_FILE_PATH
+"""
