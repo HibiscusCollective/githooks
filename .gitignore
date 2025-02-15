@@ -1,0 +1,24 @@
+## Ignore all by default
+*
+
+## Allow config
+!.github/
+!.vscode/
+!.gitignore
+!.windsurfrules
+!.editorconfig
+
+## Allow package management
+!mise.toml
+
+## Allow documentation
+!docs/
+!docs/**/
+!docs/**/*.md
+
+!licenses/
+!licenses/*.txt
+!licenses/*.md
+
+!LICENSE
+!README.md

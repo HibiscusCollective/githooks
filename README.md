@@ -29,4 +29,4 @@ All the software used in this project is either free software or has a compatibl
 Check the [ThirdPartyLicenses.md](ThirdPartyLicenses.md) file for more information.
 
 Due diligence was taken to ensure the compatibility of the licenses and the use of the software is permitted, that said mistakes can happen.
-If you come across a problem, please {{contact link}} and let us know and so we can resolve it promptly.
+If you come across a problem, please find our contact details on our [github profile](https://github.com/HibiscusCollective) and let us know and so we can resolve it promptly.
