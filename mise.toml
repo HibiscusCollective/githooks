@@ -1,2 +1,17 @@
 [tools]
+bats = "1.11.1"
 lefthook = "1.10.10"
+
+[env]
+BATS_ASSERT_PATH = "./vendor/bats/assert"
+BATS_ASSERT_VERSION = "v2.1.0"
+
+BATS_SUPPORT_PATH = "./vendor/bats/support"
+BATS_SUPPORT_VERSION = "v0.3.0"
+
+BATS_FILE_PATH = "./vendor/bats/file"
+BATS_FILE_VERSION = "v0.4.0"
+
+[tasks."bats:sync"]
+hide = true
+run = "git submodule update --init --recursive --depth=1"
