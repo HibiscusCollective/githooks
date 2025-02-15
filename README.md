@@ -1,13 +1,14 @@
-# {PROJECT_NAME}
+# Shared git hook config
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/HibiscusCollective/hibikey/badge)](https://scorecard.dev/viewer/?uri=github.com/HibiscusCollective/hibikey)
 
-{PROJECT_DESCRIPTION}
+This repository contains the shared git hook configuration for Hibiscus Collective projects.
+Note that lefthook gives shared config **higher** priority that project local config so this config will be applied in case of conflicts.
 
 ## License
 
-Copyright (C) {year}  {author(s)}
+Copyright (C) 2025 Pierre Fouilloux, Hibiscus Collective
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
