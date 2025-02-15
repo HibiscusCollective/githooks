@@ -22,3 +22,12 @@
 
 !LICENSE
 !README.md
+
+## Allow tests
+
+!spec/
+!spec/**/
+!spec/**/*.bats
+
+## Allow lefthook configuration
+!.lefthook.yml
