@@ -2,5 +2,5 @@ pre-commit:
   piped: true
   jobs:
     - name: "Ensure mise is available and tools are installed"
+      run: ruby ./scripts/ensure_mise.rb
       id: ensure_mise
-      run: ruby scripts/ensure_mise.rb

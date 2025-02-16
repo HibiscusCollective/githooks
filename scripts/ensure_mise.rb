@@ -1,5 +1,4 @@
-#!/usr/bin/env ruby
-
+#!ruby
 # frozen_string_literal: true
 
 unless system('command -v mise >/dev/null 2>&1')

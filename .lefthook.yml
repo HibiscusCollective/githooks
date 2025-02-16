@@ -1,5 +1,5 @@
 assert_lefthook_installed: true
+
 extends:
   - config/workflow.yml
-  - config/pre-commit/gen.yml
-  - config/pre-commit/lint.yml
+  - config/pre-commit/lint/yaml.yml

@@ -1,19 +1,21 @@
 pre-commit:
   jobs:
-    - name: "Pre-commit workflow"
-      id: pre_commit_piped
+    - name: "Run linters & formatters"
+      id: group_linters_formatters
       group:
+        parallel: true
         jobs:
-          - name: "Run linters & formatters"
-            id: group_linters_formatters
+          - name: "YAML Files"
+            id: lint_yaml
             group:
+              piped: true
+              stage_fixed: true
               jobs:
-                name: "Run yamlfmt, then yamllint"
-                id: group_lint_yaml
-                glob: "**/*.{yaml,yml}"
-                group:
-                  piped: true
-                  jobs:
-                    - name: "[Debug] List files"
-                      id: yamllist
-                      run: echo "[Debug] linting:{staged_files}"
+                - name: "Ensure default config files"
+                  run: ruby ./scripts/ensure_config.rb --output .yamllint --input ./scripts/defaults/.yamllint
+                - name: "Run yamlfmt"
+                  glob: "**/*.{yml,yaml}"
+                  run: yamlfmt {staged_files} .yamlfmt --lint
+                - name: "Run yamllint"
+                  glob: "**/*.{yml,yaml}"
+                  run: yamllint {staged_files} .yamllint --strict

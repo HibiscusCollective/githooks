@@ -35,3 +35,6 @@
 !scripts/
 !scripts/**/
 !scripts/**/*.rb
+
+!scripts/**/.yamlfmt
+!scripts/**/.yamllint

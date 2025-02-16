@@ -83,7 +83,6 @@ IDE-focused YAML tooling with schema validation
 * [yamlfmt GitHub Repository](https://github.com/google/yamlfmt)
 * [yamllint GitHub Repository](https://github.com/adrienverge/yamllint)
 * Implementation details are available in the pre-commit hooks configuration
-* VS Code integration settings are documented in the project's `.vscode/settings.json`
 
 This decision should be revisited if:
 

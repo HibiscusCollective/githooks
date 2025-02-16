@@ -1,8 +1,0 @@
-pre-commit:
-  jobs:
-    - name: "Run code generation tools"
-      id: group_codegen
-      group:
-        parallel: true
-        jobs:
-          - run: echo "No code generation configured"
