@@ -30,3 +30,8 @@
 !config/**/
 !config/**/*.yml
 !config/**/*.yaml
+
+## Allow scripts
+!scripts/
+!scripts/**/
+!scripts/**/*.rb

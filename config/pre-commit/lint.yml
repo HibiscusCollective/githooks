@@ -1,0 +1,8 @@
+pre-commit:
+  jobs:
+    - name: "Run linters & formatters"
+      id: group_linters_formatters
+      group:
+        parallel: true
+        jobs:
+          - run: echo "No linters and formatters configured"

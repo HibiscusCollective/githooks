@@ -1,2 +1,4 @@
 [tools]
+"gem:rubocop" = "1.72.1"
 lefthook = "1.10.10"
+ruby = "3.4.2"
