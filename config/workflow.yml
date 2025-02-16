@@ -1,0 +1,20 @@
+pre-commit:
+  parallel: true
+  jobs:
+    - name: "Pre-commit workflow"
+      id: pre_commit_piped
+      group:
+        piped: true
+        jobs:
+          - name: "Run code generation tools"
+            id: group_codegen
+            group:
+              parallel: true
+              jobs:
+                - run: echo "Running code generation tools"
+          - name: "Run linters & formatters"
+            id: group_linters_formatters
+            group:
+              parallel: true
+              jobs:
+                - run: echo "No linters and formatters configured"

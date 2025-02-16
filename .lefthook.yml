@@ -1,11 +1,4 @@
 assert_lefthook_installed: true
-
-pre-commit:
-  parallel: true
-  jobs:
-    - name: "Pre-commit workflow"
-      group:
-        piped: true
-        jobs:
-          - name: "Run code generation tools"
-            run: "echo 'Running code generation tools'"
+extends:
+  - config/workflow.yml
+  - config/pre-commit/lint/yaml.yml

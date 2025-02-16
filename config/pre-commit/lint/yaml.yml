@@ -1,0 +1,19 @@
+pre-commit:
+  jobs:
+    - name: "Pre-commit workflow"
+      id: pre_commit_piped
+      group:
+        jobs:
+          - name: "Run linters & formatters"
+            id: group_linters_formatters
+            group:
+              jobs:
+                name: "Run yamlfmt, then yamllint"
+                id: group_lint_yaml
+                glob: "**/*.{yaml,yml}"
+                group:
+                  piped: true
+                  jobs:
+                    - name: "[Debug] List files"
+                      id: yamllist
+                      run: echo "[Debug] linting:{staged_files}"

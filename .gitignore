@@ -25,3 +25,8 @@
 
 ## Allow lefthook configuration
 !.lefthook.yml
+
+!config
+!config/**/
+!config/**/*.yml
+!config/**/*.yaml
