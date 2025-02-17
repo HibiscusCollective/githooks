@@ -2,8 +2,9 @@
 
 require 'rubygems'
 require 'minitest/reporters'
+require 'minitest/pride'
 
-Minitest::Reporters.use!
+Minitest::Reporters.use! [Minitest::Reporters::SpecReporter.new(color: true)]
 
 warn('No test files specified') if ARGV.empty?
 
