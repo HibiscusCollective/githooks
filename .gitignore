@@ -38,3 +38,8 @@
 
 !scripts/**/.yamlfmt
 !scripts/**/.yamllint
+
+!test/
+!test/**/*.rb
+!test/Gemfile
+!test/Gemfile.lock
