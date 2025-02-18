@@ -3,3 +3,28 @@ assert_lefthook_installed: true
 extends:
   - config/workflow.yml
   - config/pre-commit/lint/yaml.yml
+
+pre-commit:
+  jobs:
+    - name: "Run linters & formatters"
+      id: group_linters_formatters
+      group:
+        parallel: true
+        jobs:
+          - name: "Typescript Files"
+            id: lint_typescript
+            group:
+              piped: true
+              stage_fixed: true
+              jobs:
+                - name: "Ensure node and pnpm are installed"
+                  run: mise install node pnpm
+                - name: "Ensure dependencies up to date"
+                  run: pnpm install
+                - name: "Lint"
+                  run: pnpm run lint
+                - name: "Check types"
+                  run: pnpm run type-check
+                - name: "Format"
+                  run: pnpm run format
+  

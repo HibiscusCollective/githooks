@@ -10,6 +10,8 @@
 
 ## Allow package management
 !mise.toml
+!package.json
+!pnpm-lock.yaml
 
 ## Allow documentation
 !docs/
@@ -32,15 +34,11 @@
 !config/**/*.yaml
 
 ## Allow scripts
+!tsconfig.json
+
 !scripts/
 !scripts/**/
-!scripts/**/*.rb
+!scripts/**/*.ts
 
 !scripts/**/.yamlfmt
 !scripts/**/.yamllint
-
-!test/
-!test/**/
-!test/**/*.rb
-!Gemfile
-!Gemfile.lock
