@@ -2,7 +2,9 @@
 
 **Author**: Pierre Fouilloux (@pfouilloux)
 
-![Accepted](https://img.shields.io/badge/status-accepted-brightgreen) ![2025-02-17](https://img.shields.io/badge/Date-17_Feb_2025-lightblue)
+![Superceded](https://img.shields.io/badge/status-superceded-purple)
+![Superceded Date](https://img.shields.io/badge/Superceded_On-18_Feb_2025-purple)
+![Approved Date](https://img.shields.io/badge/Approved_On-17_Feb_2025-lightblue)
 
 ## Context and Problem Statement
 

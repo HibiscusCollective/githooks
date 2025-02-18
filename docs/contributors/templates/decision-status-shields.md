@@ -12,6 +12,6 @@
 
 ![Accepted](https://img.shields.io/badge/status-accepted-darkgreen)
 
-![Rescinded](https://img.shields.io/badge/status-superceded-purple)
+![Superceded](https://img.shields.io/badge/status-superceded-purple)
 
 Use the overriden badge if an newer decision overrides or reverses an older one.

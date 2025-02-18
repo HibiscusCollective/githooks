@@ -1,6 +1,8 @@
 # **ADR-0002** Cross-Platform Scripting Language Selection
 
-![Accepted](https://img.shields.io/badge/status-accepted-green) ![Date](https://img.shields.io/badge/Date-16_Feb_2025-lightblue)
+![Superceded](https://img.shields.io/badge/status-superceded-purple)
+![Superceded Date](https://img.shields.io/badge/Superceded_On-18_Feb_2025-purple)
+![Approved Date](https://img.shields.io/badge/Approved_On-16_Feb_2025-lightblue)
 
 ## Context and Problem Statement
 
