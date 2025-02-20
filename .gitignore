@@ -35,11 +35,4 @@
 !config/**/*.yaml
 
 ## Allow scripts
-!tsconfig.json
-
 !scripts/
-!scripts/**/
-!scripts/**/*.ts
-
-!scripts/**/.yamlfmt
-!scripts/**/.yamllint
