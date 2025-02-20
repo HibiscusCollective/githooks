@@ -35,4 +35,4 @@
 !config/**/*.yaml
 
 ## Allow scripts
-!scripts/
+!toolbox/

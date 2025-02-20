@@ -1,9 +1,0 @@
-extends: default
-
-rules:
-  line-length:
-    max: 180
-  document-start: false
-  truthy:
-    ignore:
-      - .github/workflows/*.yaml
