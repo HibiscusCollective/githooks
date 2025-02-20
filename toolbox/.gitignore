@@ -1,6 +1,11 @@
+## Package management
 !bun.lock
 !package.json
 !tsconfig.json
 
+## Source files
 !src
 !*.ts
+
+## Tasks
+!.tasks.toml

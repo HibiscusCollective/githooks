@@ -6,11 +6,22 @@ pnpm = "10.4.1"
 yamlfmt = "0.16.0"
 yamllint = "1.35.1"
 
+[task_config]
+includes = ["toolbox/.tasks.toml"]
+
+[tasks.lint]
+description = "Run linters and formatters"
+depends = ["lint:*"]
 
 [tasks.test]
-description = "Run tests"
-dir = "scripts"
-usage = """
-arg "[files]" var=#true default="./scripts/**/*.test.ts"
-"""
-run = 'pnpm run test {{arg(name="files")}}'
+description = "Run all tests"
+depends = ["test:*"]
+
+[tasks.check]
+quiet = true
+description = "Run linters, formatters, and tests"
+run = 'mise run lint test'
+
+[tasks.fix]
+description = "Run linters and formatters in fix mode"
+depends = ["lint:*:fix"]

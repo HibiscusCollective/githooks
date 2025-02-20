@@ -1,0 +1,14 @@
+["test:toolbox"]
+description = "Run all tests"
+dir= "toolbox"
+run = "bun run test"
+
+["lint:toolbox"]
+description = "Run linters and formatters"
+dir= "toolbox"
+run = "bun run lint"
+
+["lint:toolbox:fix"]
+description = "Run linters and formatters in fix mode"
+dir= "toolbox"
+run = "bun run lint:fix"
