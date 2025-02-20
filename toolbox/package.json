@@ -1,11 +1,20 @@
 {
-  "name": "toolbox",
-  "module": "index.ts",
-  "type": "module",
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  }
+	"name": "toolbox",
+	"module": "index.ts",
+	"type": "module",
+	"scripts": {
+		"type-check": "tsc --noEmit",
+		"lint": "prettier --check . && eslint .",
+		"lint:fix": "prettier --write . && eslint . --fix",
+		"test": "bun test"
+	},
+	"devDependencies": {
+		"@types/bun": "latest",
+		"eslint": "^9.20.1",
+		"eslint-config-love": "^118.0.0",
+		"prettier": "^3.5.1"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	}
 }
