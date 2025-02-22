@@ -3,6 +3,12 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { ok, type Result } from './result'
 
+export interface FSLike {
+	ls: (path: PathLike, options?: LsOptions) => Promise<FileLike[]>
+	cp: (source: PathLike, dest: PathLike) => Promise<Result<PathLike>>
+	mkdirp(p: PathLike): Promise<Result<PathLike>>
+}
+
 export interface LsOptions {
 	readonly recursive: boolean
 	readonly files: boolean
@@ -12,12 +18,6 @@ export interface LsOptions {
 export interface FileLike {
 	readonly path: PathLike
 	readonly isDirectory: boolean
-}
-
-export interface FSLike {
-	ls: (path: PathLike, options?: LsOptions) => Promise<FileLike[]>
-	cp: (source: PathLike, dest: PathLike) => Promise<Result<PathLike>>
-	mkdirp(p: PathLike): Promise<Result<PathLike>>
 }
 
 export class FileInfo implements FileLike {
@@ -37,6 +37,31 @@ export class DirInfo implements FileLike {
 	constructor(path: PathLike) {
 		this.path = path
 		this.isDirectory = true
+	}
+}
+
+export class FSError extends Error {
+	constructor(message: string, reason: string, path: PathLike) {
+		super(message)
+
+		this.name = 'FSError'
+		this.reason = reason
+		this.path = path
+	}
+
+	readonly reason: string
+	readonly path: PathLike
+
+	display(): string {
+		return `${this.message}: "${this.path}": ${this.reason}`
+	}
+
+	json(): string {
+		return JSON.stringify({
+			message: this.message,
+			reason: this.reason,
+			path: this.path,
+		})
 	}
 }
 
