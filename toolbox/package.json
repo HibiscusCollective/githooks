@@ -8,10 +8,12 @@
 		"test": "bun test"
 	},
 	"devDependencies": {
-		"@types/bun": "latest",
+		"@types/bun": "^1.2.2",
 		"eslint": "^9.20.1",
 		"eslint-config-love": "^118.0.0",
-		"prettier": "^3.5.1"
+		"memfs": "^4.17.0",
+		"prettier": "^3.5.1",
+		"unionfs": "^4.5.4"
 	},
 	"peerDependencies": {
 		"typescript": "^5.0.0"
