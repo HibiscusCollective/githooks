@@ -1,13 +1,23 @@
 import { describe, expect, it } from 'bun:test'
-import { err, ok, StructuredError, type Result } from './result.ts'
+import { err, ok, type StructuredError, type Result } from './result.ts'
 
-class TestError extends StructuredError {
+class TestError implements StructuredError {
+	readonly name = 'TestError'
+	readonly message = 'test message'
 	readonly testField: string
 
 	constructor({ testField }: { testField: string }) {
-		super('test message')
-
 		this.testField = testField
+	}
+
+	display(): string {
+		return this.testField
+	}
+
+	json(): string {
+		return JSON.stringify({
+			testField: this.testField,
+		})
 	}
 }
 
