@@ -5,7 +5,7 @@ import { err, ok, type Result } from './result'
 
 export interface FSLike {
 	ls: (path: PathLike, options?: LsOptions) => Promise<Result<FileLike[]>>
-	cp: (source: PathLike, dest: PathLike) => Promise<Result<PathLike>>
+	cp: (source: PathLike, dest: PathLike) => Promise<Result<FileLike[]>>
 	mkdirp(p: PathLike): Promise<Result<PathLike>>
 }
 
@@ -53,7 +53,7 @@ export class FSError extends Error {
 	}
 
 	display(): string {
-		return `${this.message}: "${this.path}": ${this.reason}`
+		return `${this.message}: "${this.path}": ${this.reason.message}`
 	}
 
 	json(): string {
@@ -101,8 +101,10 @@ export class AsyncFS implements FSLike {
 		return ok(infos)
 	}
 
-	async cp(source: PathLike, dest: PathLike): Promise<Result<PathLike>> {
-		return ok(dest)
+	async cp(source: PathLike, dest: PathLike): Promise<Result<FileLike[]>> {
+		await this.io.copyFile(source, dest)
+
+		return await this.ls(dest)
 	}
 
 	async mkdirp(p: PathLike): Promise<Result<PathLike>> {

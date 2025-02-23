@@ -1,4 +1,4 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, test, expect, it, mock } from 'bun:test'
 
 import type { PathLike } from 'fs'
 import * as fs from 'fs'
@@ -30,7 +30,7 @@ describe('given a temporary directory', async () => {
 		const testdataDir = path.join(__dirname, 'testdata')
 		expect(await fs.promises.exists(testdataDir)).toBeTrue()
 
-		describe('when the ls command is invoked on the testdata directory', async () => {
+		test('when the ls command is invoked on the testdata directory', async () => {
 			const result = await new AsyncFS().ls(testdataDir)
 
 			it('it should not return any errors', () => {
@@ -46,33 +46,49 @@ describe('given a temporary directory', async () => {
 			})
 		})
 
-		describe('and a mock fs implementation configured to throw an error on reading any directory', async () => {
-			beforeAll(() => {
-				mock.module('fs/promises', () => ({
-					readdir: () => {
-						throw new Error('test error')
-					},
-				}))
+		test('when the cp command is invoked to copy "testdata/test.txt" to "{tmpdir}/test_copy.txt"', async () => {
+			const dest = path.join(tmpDir.toLocaleString(), 'test_copy.txt')
+			const src = path.join(testdataDir, 'test.txt')
+
+			const result = await new AsyncFS().cp(src, dest)
+
+			it('it should not return any errors', () => {
+				expect(result.err()).toBeUndefined()
 			})
 
-			afterAll(() => {
-				mock.restore()
+			it('it should copy the file', async () => {
+				expect(await fs.promises.exists(dest)).toBeTrue()
+				expect(await fs.promises.readFile(dest, 'utf-8')).toEqual(await fs.promises.readFile(src, 'utf-8'))
+			})
+		})
+	})
+
+	describe('and a mock fs implementation configured to throw an error on reading any directory', async () => {
+		beforeAll(() => {
+			mock.module('fs/promises', () => ({
+				readdir: () => {
+					throw new Error('test error')
+				},
+			}))
+		})
+
+		afterAll(() => {
+			mock.restore()
+		})
+
+		const mockfs = await import('fs/promises')
+
+		test('when the ls command is invoked on the "/errdir" directory', async () => {
+			const result = await new AsyncFS(mockfs).ls('/errdir')
+
+			it('it should not return any files', () => {
+				expect(result.ok()).toBeUndefined()
 			})
 
-			const mockfs = await import('fs/promises')
-
-			describe('when the ls command is invoked on the "/errdir" directory', async () => {
+			it('it should return an FSError object', async () => {
 				const result = await new AsyncFS(mockfs).ls('/errdir')
 
-				it('it should not return any files', () => {
-					expect(result.ok()).toBeUndefined()
-				})
-
-				it('it should return an FSError object', async () => {
-					const result = await new AsyncFS(mockfs).ls('/errdir')
-
-					expect(result.err()).toEqual(new FSError('failed to read directory', new Error('test error'), '/errdir'))
-				})
+				expect(result.err()).toEqual(new FSError('failed to read directory', new Error('test error'), '/errdir'))
 			})
 		})
 	})
@@ -80,7 +96,7 @@ describe('given a temporary directory', async () => {
 
 describe('given an FSError', () => {
 	describe('when the message, reason and path are set', () => {
-		const fsError = new FSError('test message', 'test reason', '/test/path')
+		const fsError = new FSError('test message', new Error('test reason'), '/test/path')
 
 		it('it should display the error message as "test message: "/test/path": test reason"', () => {
 			expect(fsError.display()).toBe('test message: "/test/path": test reason')
@@ -90,7 +106,7 @@ describe('given an FSError', () => {
 			expect(fsError.json()).toStrictEqual(
 				JSON.stringify({
 					message: 'test message',
-					reason: 'test reason',
+					reason: new Error('test reason'),
 					path: '/test/path',
 				})
 			)
