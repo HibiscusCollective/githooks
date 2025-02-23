@@ -1,39 +1,48 @@
-export class StructuredError extends Error {
+export interface StructuredError extends Error {
 	readonly message: string
 
-	constructor(message: string) {
-		super(message)
-
-		this.message = message
-	}
+	display(): string
+	json(): string
 }
 
 export function ok<E extends StructuredError = StructuredError>(): Result<void, E>
 export function ok<T, E extends StructuredError = StructuredError>(value: T): Result<T, E>
-export function ok<T, E extends StructuredError = StructuredError>(value?: T): Result<T | void, E> {
-	return new Result<T | void, E>(value, undefined)
+export function ok<T, E extends StructuredError = StructuredError>(...values: T[]): Result<T | void, E> {
+	return new Result<T | void, E>(values, undefined)
 }
 
 export function err<E extends StructuredError = StructuredError>(): Result<void, E>
 export function err<T, E extends StructuredError = StructuredError>(error: E): Result<T, E>
-export function err<T, E extends StructuredError = StructuredError>(error?: E): Result<T, E> {
-	return new Result<T, E>(undefined, error)
+export function err<T, E extends StructuredError = StructuredError>(...errors: E[]): Result<T, E> {
+	return new Result<T, E>(undefined, errors)
 }
 
 export class Result<T = void, E extends StructuredError = StructuredError> {
-	readonly value: T | undefined
-	readonly error: E | undefined
+	readonly values: T[] | undefined
+	readonly errors: E[] | undefined
 
-	constructor(value?: T, error?: E) {
-		this.value = value
-		this.error = error
+	constructor(values?: T[], errors?: E[]) {
+		this.values = values
+		this.errors = errors
 	}
 
-	ok(): T | undefined {
-		return this.value
+	ok(): T | undefined
+	ok(): T[] | undefined
+	ok(): T | T[] | undefined {
+		if (this.values?.length === 1) {
+			return this.values[0]
+		}
+
+		return this.values
 	}
 
-	err(): E | undefined {
-		return this.error
+	err(): E | undefined
+	err(): E[] | undefined
+	err(): E | E[] | undefined {
+		if (this.errors?.length === 1) {
+			return this.errors[0]
+		}
+
+		return this.errors
 	}
 }

@@ -1,9 +1,8 @@
-import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'bun:test'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test'
 
 import type { PathLike } from 'fs'
 import * as fs from 'fs'
 import * as path from 'path'
-
 import { AsyncFS, DirInfo, FileInfo, FSError } from './fs'
 
 const TMP_DIR = 'tmp'
@@ -32,10 +31,14 @@ describe('given a temporary directory', async () => {
 		expect(await fs.promises.exists(testdataDir)).toBeTrue()
 
 		describe('when the ls command is invoked on the testdata directory', async () => {
-			const files = await new AsyncFS().ls(testdataDir)
+			const result = await new AsyncFS().ls(testdataDir)
+
+			it('it should not return any errors', () => {
+				expect(result.err()).toBeUndefined()
+			})
 
 			it('it should return a list of files and directories in the testdata directory', () => {
-				expect(files).toContainAllValues([
+				expect(result.ok()).toContainAllValues([
 					new DirInfo(path.join(testdataDir, 'subdir')),
 					new FileInfo(path.join(testdataDir, 'test.txt')),
 					new FileInfo(path.join(testdataDir, 'empty.txt')),
@@ -43,12 +46,32 @@ describe('given a temporary directory', async () => {
 			})
 		})
 
-		describe('when the ls command is invoked on a non-existent directory', async () => {
-			it('it should throw an FSError', () => {
-				expect(() => new AsyncFS().ls('/non-existent-dir')).toThrowError({
-					message: 'no such file or directory',
-					reason: 'ENOENT',
-					path: '/non-existent-dir',
+		describe('and a mock fs implementation configured to throw an error on reading any directory', async () => {
+			beforeAll(() => {
+				mock.module('fs/promises', () => ({
+					readdir: () => {
+						throw new Error('test error')
+					},
+				}))
+			})
+
+			afterAll(() => {
+				mock.restore()
+			})
+
+			const mockfs = await import('fs/promises')
+
+			describe('when the ls command is invoked on the "/errdir" directory', async () => {
+				const result = await new AsyncFS(mockfs).ls('/errdir')
+
+				it('it should not return any files', () => {
+					expect(result.ok()).toBeUndefined()
+				})
+
+				it('it should return an FSError object', async () => {
+					const result = await new AsyncFS(mockfs).ls('/errdir')
+
+					expect(result.err()).toEqual(new FSError('failed to read directory', new Error('test error'), '/errdir'))
 				})
 			})
 		})

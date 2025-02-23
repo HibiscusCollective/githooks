@@ -1,10 +1,10 @@
 import type { PathLike } from 'fs'
 import * as fs from 'fs'
 import * as path from 'path'
-import { ok, type Result } from './result'
+import { err, ok, type Result } from './result'
 
 export interface FSLike {
-	ls: (path: PathLike, options?: LsOptions) => Promise<FileLike[]>
+	ls: (path: PathLike, options?: LsOptions) => Promise<Result<FileLike[]>>
 	cp: (source: PathLike, dest: PathLike) => Promise<Result<PathLike>>
 	mkdirp(p: PathLike): Promise<Result<PathLike>>
 }
@@ -41,16 +41,16 @@ export class DirInfo implements FileLike {
 }
 
 export class FSError extends Error {
-	constructor(message: string, reason: string, path: PathLike) {
+	readonly reason: Error
+	readonly path: PathLike
+
+	constructor(message: string, reason: Error, path: PathLike) {
 		super(message)
 
 		this.name = 'FSError'
 		this.reason = reason
 		this.path = path
 	}
-
-	readonly reason: string
-	readonly path: PathLike
 
 	display(): string {
 		return `${this.message}: "${this.path}": ${this.reason}`
@@ -65,22 +65,40 @@ export class FSError extends Error {
 	}
 }
 
+export class FSErrorList extends Error {
+	readonly errs: FSError[]
+
+	constructor(...errs: FSError[]) {
+		super('multiple errors')
+		this.errs = errs
+	}
+}
+
 const DEFAULT_LS_OPTS: LsOptions = { recursive: false, files: true, directories: true }
 
 export class AsyncFS implements FSLike {
-	async ls(p: PathLike, options: LsOptions = DEFAULT_LS_OPTS): Promise<FileLike[]> {
-		const files = await fs.promises.readdir(p)
+	io: typeof fs.promises
+
+	constructor(io: typeof fs.promises = fs.promises) {
+		this.io = io
+	}
+
+	async ls(p: PathLike, options: LsOptions = DEFAULT_LS_OPTS): Promise<Result<FileLike[]>> {
+		let result = await this.listDirEntries(p)
+		if (result.err()) {
+			return err(result.err()!)
+		}
 
 		const infos = await Promise.all(
-			files.map(async file => {
+			result.ok()!.map(async file => {
 				const filePath = path.resolve(p.toLocaleString(), file)
-				const stat = await fs.promises.stat(filePath)
+				const stat = await this.io.stat(filePath)
 
 				return stat.isDirectory() ? new DirInfo(filePath) : new FileInfo(filePath)
 			})
 		)
 
-		return infos
+		return ok(infos)
 	}
 
 	async cp(source: PathLike, dest: PathLike): Promise<Result<PathLike>> {
@@ -96,5 +114,17 @@ export class AsyncFS implements FSLike {
 		const absPath = path.resolve(p.toLocaleString())
 
 		return ok(absPath)
+	}
+
+	private async listDirEntries(p: PathLike): Promise<Result<string[]>> {
+		try {
+			return ok(await this.io.readdir(p))
+		} catch (error) {
+			if (error instanceof Error) {
+				return err(new FSError('failed to read directory', error, p))
+			}
+
+			throw error
+		}
 	}
 }
