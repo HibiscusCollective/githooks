@@ -4,8 +4,7 @@
 	"type": "module",
 	"scripts": {
 		"lint": "tsc --noEmit && prettier --check . && eslint .",
-		"lint:fix": "tsc --noEmit && prettier --write . && eslint . --fix",
-		"test": "bun test"
+		"lint:fix": "tsc --noEmit && prettier --write . && eslint . --fix"
 	},
 	"devDependencies": {
 		"@types/bun": "^1.2.2",

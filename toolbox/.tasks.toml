@@ -1,14 +1,19 @@
+["dev:toolbox"]
+description = "Run tests in watch mode"
+dir = "toolbox"
+run = "bun dev"
+
 ["test:toolbox"]
 description = "Run all tests"
-dir= "toolbox"
-run = "bun run test"
+dir = "toolbox"
+run = "bun test"
 
 ["lint:toolbox"]
 description = "Run linters and formatters"
-dir= "toolbox"
+dir = "toolbox"
 run = "bun run lint"
 
 ["lint:toolbox:fix"]
 description = "Run linters and formatters in fix mode"
-dir= "toolbox"
+dir = "toolbox"
 run = "bun run lint:fix"
