@@ -7,5 +7,11 @@
 !src
 !*.ts
 
+## Test data
+!src/testdata/
+!src/testdata/**/
+!src/testdata/**/*.txt
+!src/testdata/**/*.json
+
 ## Tasks
 !.tasks.toml

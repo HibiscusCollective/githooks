@@ -102,9 +102,20 @@ export class AsyncFS implements FSLike {
 	}
 
 	async cp(source: PathLike, dest: PathLike): Promise<Result<FileLike[]>> {
-		await this.io.copyFile(source, dest)
+		try {
+			if (await this.isFile(source)) {
+				await this.io.copyFile(source, dest)
+			}
 
-		return await this.ls(dest)
+			if (await this.isDir(source)) {
+				await this.io.mkdir(dest, { recursive: true })
+				await this.io.cp(source.toLocaleString(), dest.toLocaleString(), { recursive: true })
+			}
+
+			return await this.ls(dest)
+		} catch (error) {
+			throw new Error('Error handling not implemented', { cause: error })
+		}
 	}
 
 	async mkdirp(p: PathLike): Promise<Result<PathLike>> {
@@ -128,5 +139,13 @@ export class AsyncFS implements FSLike {
 
 			throw error
 		}
+	}
+
+	private async isFile(p: PathLike): Promise<boolean> {
+		return (await this.io.stat(p)).isFile()
+	}
+
+	private async isDir(p: PathLike): Promise<boolean> {
+		return (await this.io.stat(p)).isDirectory()
 	}
 }

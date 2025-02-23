@@ -61,6 +61,33 @@ describe('given a temporary directory', async () => {
 				expect(await fs.promises.readFile(dest, 'utf-8')).toEqual(await fs.promises.readFile(src, 'utf-8'))
 			})
 		})
+
+		test('when the cp command is invoked to copy the "testdata/" directory to "{tmpdir}/copy/"', async () => {
+			const dest = path.join(tmpDir.toLocaleString(), 'copy')
+			const src = path.join(testdataDir)
+
+			const result = await new AsyncFS().cp(src, dest)
+
+			it('it should not return any errors', () => {
+				expect(result.err()).toBeUndefined()
+			})
+
+			it('it should copy the directory recursively', async () => {
+				const srcFiles = await fs.promises.readdir(src, { recursive: true })
+				const destFiles = await fs.promises.readdir(dest, { recursive: true })
+
+				expect(srcFiles).toEqual(destFiles)
+
+				for (const [i, src] of srcFiles.entries()) {
+					const dst = destFiles[i]
+
+					const srcContent = await fs.promises.readFile(path.join(src, src), 'utf-8')
+					const dstContent = await fs.promises.readFile(path.join(dest, dst), 'utf-8')
+
+					expect(srcContent).toEqual(dstContent)
+				}
+			})
+		})
 	})
 
 	describe('and a mock fs implementation configured to throw an error on reading any directory', async () => {
