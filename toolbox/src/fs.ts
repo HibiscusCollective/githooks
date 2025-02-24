@@ -1,12 +1,24 @@
-import type { PathLike } from 'fs'
+import type { MakeDirectoryOptions, ObjectEncodingOptions, PathLike } from 'fs'
 import * as fs from 'fs'
 import * as path from 'path'
-import { err, ok, type Result } from './result'
+import { err, ok, type Result, type StructuredError } from './result'
+import { Fields } from './structured_error'
+
+export enum FSErrorCode {
+	Unknown = 'unknown error',
+	ReadDirError = 'failed to read directory contents',
+	CopyError = 'failed to copy file(s) and/or director(ies)',
+}
 
 export interface FSLike {
-	ls: (path: PathLike, options?: LsOptions) => Promise<Result<FileLike[]>>
-	cp: (source: PathLike, dest: PathLike) => Promise<Result<FileLike[]>>
-	mkdirp(p: PathLike): Promise<Result<PathLike>>
+	readdir: (
+		path: PathLike,
+		options?: (ObjectEncodingOptions & { withFileTypes?: false | undefined; recursive?: boolean | undefined }) | BufferEncoding | null
+	) => Promise<string[]>
+	copyFile: (src: PathLike, dest: PathLike) => Promise<void>
+	cp: (source: string | URL, destination: string | URL, opts?: fs.CopyOptions) => Promise<void>
+	mkdir(path: PathLike, options: MakeDirectoryOptions & { recursive: true }): Promise<string | undefined>
+	stat: (path: PathLike) => Promise<{ isFile: () => boolean; isDirectory: () => boolean }>
 }
 
 export interface LsOptions {
@@ -40,27 +52,39 @@ export class DirInfo implements FileLike {
 	}
 }
 
-export class FSError extends Error {
-	readonly reason: Error
-	readonly path: PathLike
+export class FSError implements StructuredError {
+	readonly name: string = 'FSError'
+	readonly code: FSErrorCode
+	readonly message: string
+	readonly fields?: Fields
+	readonly cause?: Error
 
-	constructor(message: string, reason: Error, path: PathLike) {
-		super(message)
+	static ReadDirError({ cause, dir }: { cause?: Error; dir: PathLike }): FSError {
+		return new FSError(FSErrorCode.ReadDirError, cause, new Fields({ path: dir.toLocaleString() }))
+	}
 
-		this.name = 'FSError'
-		this.reason = reason
-		this.path = path
+	static CopyError({ cause, srcs, dsts }: { cause?: Error; srcs: PathLike[]; dsts: PathLike[] }): FSError {
+		const fields = new Fields({ srcs: srcs.map(src => src.toLocaleString()), dsts: dsts.map(dst => dst.toLocaleString()) })
+		return new FSError(FSErrorCode.CopyError, cause, fields)
+	}
+
+	private constructor(code: FSErrorCode, cause?: Error, fields?: Fields) {
+		this.code = code
+		this.message = code.toString()
+		this.cause = cause
+		this.fields = fields
 	}
 
 	display(): string {
-		return `${this.message}: "${this.path}": ${this.reason.message}`
+		return `${this.message}: ${this.cause?.message}`
 	}
 
 	json(): string {
 		return JSON.stringify({
 			message: this.message,
-			reason: this.reason,
-			path: this.path,
+			cause: this.cause,
+			stacktrace: this.cause?.stack,
+			...this.fields,
 		})
 	}
 }
@@ -76,10 +100,10 @@ export class FSErrorList extends Error {
 
 const DEFAULT_LS_OPTS: LsOptions = { recursive: false, files: true, directories: true }
 
-export class AsyncFS implements FSLike {
-	io: typeof fs.promises
+export class AsyncFS {
+	readonly io: FSLike
 
-	constructor(io: typeof fs.promises = fs.promises) {
+	constructor(io: FSLike = fs.promises) {
 		this.io = io
 	}
 
@@ -114,7 +138,11 @@ export class AsyncFS implements FSLike {
 
 			return await this.ls(dest)
 		} catch (error) {
-			throw new Error('Error handling not implemented', { cause: error })
+			if (error instanceof Error) {
+				return err(FSError.CopyError({ cause: error, srcs: [source], dsts: [dest] }))
+			}
+
+			throw error
 		}
 	}
 
@@ -147,5 +175,18 @@ export class AsyncFS implements FSLike {
 
 	private async isDir(p: PathLike): Promise<boolean> {
 		return (await this.io.stat(p)).isDirectory()
+	}
+
+	private async copyFile(src: PathLike, dst: PathLike): Promise<Result<FileLike>> {
+		try {
+			await this.io.copyFile(src, dst)
+			return ok(new FileInfo(dst))
+		} catch (error) {
+			if (error instanceof Error) {
+				return err(new FSError('failed to copy file to file', error, src))
+			}
+
+			throw error
+		}
 	}
 }

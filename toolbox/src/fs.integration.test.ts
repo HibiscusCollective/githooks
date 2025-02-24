@@ -3,7 +3,9 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, test, expect, it,
 import type { PathLike } from 'fs'
 import * as fs from 'fs'
 import * as path from 'path'
-import { AsyncFS, DirInfo, FileInfo, FSError } from './fs'
+import { AsyncFS, DirInfo, FileInfo, FSError, FSErrorCode } from './fs'
+
+const FSPROMISES_ID = 'fs/promises'
 
 const TMP_DIR = 'tmp'
 const INTEGRATION_TEST_DIR = path.join(TMP_DIR, 'integration')
@@ -92,7 +94,7 @@ describe('given a temporary directory', async () => {
 
 	describe('and a mock fs implementation configured to throw an error on reading any directory', async () => {
 		beforeAll(() => {
-			mock.module('fs/promises', () => ({
+			mock.module(FSPROMISES_ID, () => ({
 				readdir: () => {
 					throw new Error('test error')
 				},
@@ -103,7 +105,7 @@ describe('given a temporary directory', async () => {
 			mock.restore()
 		})
 
-		const mockfs = await import('fs/promises')
+		const mockfs = await import(FSPROMISES_ID)
 
 		test('when the ls command is invoked on the "/errdir" directory', async () => {
 			const result = await new AsyncFS(mockfs).ls('/errdir')
@@ -113,30 +115,88 @@ describe('given a temporary directory', async () => {
 			})
 
 			it('it should return an FSError object', async () => {
-				const result = await new AsyncFS(mockfs).ls('/errdir')
-
-				expect(result.err()).toEqual(new FSError('failed to read directory', new Error('test error'), '/errdir'))
+				expect(result.err()).toEqual(FSError.ReadDirError({ cause: new Error('test error'), dir: '/errdir' }))
 			})
 		})
 	})
-})
 
-describe('given an FSError', () => {
-	describe('when the message, reason and path are set', () => {
-		const fsError = new FSError('test message', new Error('test reason'), '/test/path')
+	describe('and a mock fs implementation configured to throw an error on copying any file', async () => {
+		const TEST_ERR = new Error('test error', { cause: new Error('inner error') })
 
-		it('it should display the error message as "test message: "/test/path": test reason"', () => {
-			expect(fsError.display()).toBe('test message: "/test/path": test reason')
+		beforeAll(() => {
+			mock.module(FSPROMISES_ID, () => ({
+				copyFile: () => {
+					throw TEST_ERR
+				},
+			}))
 		})
 
-		it('it should return a structured error as json', () => {
-			expect(fsError.json()).toStrictEqual(
-				JSON.stringify({
-					message: 'test message',
-					reason: new Error('test reason'),
-					path: '/test/path',
+		afterAll(() => {
+			mock.restore()
+		})
+
+		const mockfs = await import(FSPROMISES_ID)
+
+		test('when the cp command is invoked with a file source and file destination', async () => {
+			const result = await new AsyncFS(mockfs).cp('src/test.txt', 'dst/test.txt')
+
+			it('it should not return any files', () => {
+				expect(result.ok()).toBeUndefined()
+			})
+
+			it('it should return an FSError object', async () => {
+				expect(result.err()).toEqual(FSError.CopyError({ cause: new Error('test error'), srcs: ['src/test.txt'], dsts: ['dst/test.txt'] }))
+			})
+		})
+
+		test('when the cp command is invoked with a file source and a directory destination', async () => {
+			const result = await new AsyncFS(mockfs).cp('src/test.txt', 'dst')
+
+			it('it should not return any files', () => {
+				expect(result.ok()).toBeUndefined()
+			})
+
+			it('it should return an FSError object', async () => {
+				expect(result.err()).toEqual(FSError.CopyError({ cause: new Error('test error'), srcs: ['src/test.txt'], dsts: ['dst'] }))
+			})
+		})
+
+		test('when the cp command is invoked with a file source and a directory destination', async () => {
+			const result = await new AsyncFS(mockfs).cp('src/test.txt', 'dst')
+
+			it('it should not return any files', () => {
+				expect(result.ok()).toBeUndefined()
+			})
+
+			it('and it should return an FSError object', async () => {
+				const fsErr = result.err() as FSError
+
+				expect(fsErr).toEqual(FSError.CopyError({ cause: new Error('test error'), srcs: ['src/test.txt'], dsts: ['dst'] }))
+
+				it('and it should have the name "FSError" and code "CopyError"', () => {
+					expect(fsErr.name).toBe('FSError')
+					expect(fsErr.code).toBe(FSErrorCode.CopyError)
 				})
-			)
+
+				it('and it should display the error message as "failed to copy file(s) and/or director(ies): test reason"', () => {
+					expect(fsErr.display()).toBe('failed to copy file(s) and/or director(ies): test reason')
+				})
+
+				it('and it should return a structured error containing sources and destinations as json', () => {
+					let err = new Error('test reason')
+
+					expect(fsErr.json()).toStrictEqual(
+						JSON.stringify({
+							message: 'failed to copy file(s) and/or director(ies)',
+							reason: TEST_ERR.cause,
+							stack: TEST_ERR.stack,
+							code: 'CopyError',
+							srcs: ['src/test.txt'],
+							dsts: ['dst'],
+						})
+					)
+				})
+			})
 		})
 	})
 })
