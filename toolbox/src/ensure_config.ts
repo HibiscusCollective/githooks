@@ -1,7 +1,8 @@
 import type { PathLike } from 'fs'
-import type { FSLike } from './fs'
-import { ok, type StructuredError, type Result } from './result'
 import * as path from 'path'
+
+import { AsyncFS } from './fs'
+import { ok, type StructuredError } from './result'
 
 export class EnsureConfigError implements StructuredError {
 	readonly name = 'EnsureConfigError'
@@ -29,4 +30,21 @@ export class EnsureConfigError implements StructuredError {
 			dstDir: this.destDir,
 		})
 	}
+}
+
+export async function ensureConfig(fs: AsyncFS, { destDir, sources }: { destDir: PathLike; sources: PathLike[] }) {
+	if (sources.length === 0) {
+		return ok([])
+	}
+
+	const absDestDir = await fs.mkdirp(destDir)
+	const copiedFiles = await Promise.all(
+		sources.map(async source => {
+			await fs.cp(source, path.join(absDestDir.toLocaleString(), path.basename(source.toLocaleString())))
+
+			return source
+		})
+	)
+
+	return ok(copiedFiles)
 }
