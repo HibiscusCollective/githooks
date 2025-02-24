@@ -162,7 +162,7 @@ export class AsyncFS {
 			return ok(await this.io.readdir(p))
 		} catch (error) {
 			if (error instanceof Error) {
-				return err(new FSError('failed to read directory', error, p))
+				return err(FSError.ReadDirError({ cause: error, dir: p }))
 			}
 
 			throw error
@@ -175,18 +175,5 @@ export class AsyncFS {
 
 	private async isDir(p: PathLike): Promise<boolean> {
 		return (await this.io.stat(p)).isDirectory()
-	}
-
-	private async copyFile(src: PathLike, dst: PathLike): Promise<Result<FileLike>> {
-		try {
-			await this.io.copyFile(src, dst)
-			return ok(new FileInfo(dst))
-		} catch (error) {
-			if (error instanceof Error) {
-				return err(new FSError('failed to copy file to file', error, src))
-			}
-
-			throw error
-		}
 	}
 }
